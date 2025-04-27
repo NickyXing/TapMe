@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tapmeplus1.com/sitemap.xml

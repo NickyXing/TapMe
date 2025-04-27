@@ -54,6 +54,8 @@ body {
     padding: 20px;
     text-align: center;
     transition: background-color 0.3s ease;
+    height: 90vh;
+    overflow-y: auto;
 }
 
 h1 {
@@ -523,6 +525,7 @@ button#restart-btn:hover {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -556,6 +559,33 @@ button#restart-btn:hover {
     font-size: 1.8rem;
 }
 
+.game-rules {
+    margin: 25px auto 0 auto;
+    padding: 0 20px;
+    background-color: var(--container-bg);
+    width: 20rem
+}
+
+.game-rules h2 {
+    font-size: 1rem;
+    color: var(--button-bg);
+    margin: 15px 0;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--button-bg);
+}
+
+.game-rules ul {
+    margin: 10px 0 20px;
+}
+
+.game-rules li {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    margin: 12px 0;
+    padding-left: 25px;
+}
+}
+}
 .game-results {
     margin: 20px 0;
     text-align: center;
@@ -622,8 +652,13 @@ button#restart-btn:hover {
 
 /* 为游戏结束弹框添加的媒体查询，优化在小屏幕上的显示 */
 @media (max-width: 480px) {
+    .container {
+        height: 100vh;
+        overflow-y: hidden
+    }
+}
     .game-modal::before {
-        width: 90%;
+        /* width: 90%; */
         height: auto;
         aspect-ratio: 1/1.2;
     }
@@ -650,9 +685,33 @@ button#restart-btn:hover {
 }
 
 #confirm-modal::before {
-    width: 280px;
+    width: 520px;
     height: 180px;
 }
+#language-select {
+    appearance: none; /* 去掉原生箭头 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    padding: 10px 40px 10px 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    color: #333;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  #language-select:focus {
+    border-color: #7aa0ff;
+    box-shadow: 0 0 0 3px rgba(122, 160, 255, 0.3);
+    outline: none;
+  }
 
 /* 其他按钮的样式 */
 .modal-btn:not(.primary-btn) {
@@ -672,4 +731,4 @@ button#restart-btn:hover {
 
 [data-theme="dark"] .modal-btn:not(.primary-btn):hover {
     background-color: #535353;
-} 
+}
