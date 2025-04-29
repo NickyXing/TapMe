@@ -10,8 +10,23 @@ document.addEventListener('DOMContentLoaded', () => {
         score: 0, // 积分
         maxNumberInGame: 1, // 本局游戏中的最大数字
         isNewNumberRecord: false,
-        isNewScoreRecord: false
+        isNewScoreRecord: false,
+        soundEnabled: true // 音效开关状态
     };
+
+    // 音效管理
+    const sounds = {
+        click: new Audio('sounds/pop.mp3'),
+        merge: new Audio('sounds/level-up.mp3')
+    };
+
+    // 音效控制函数
+    function playSound(soundName) {
+        if (gameState.soundEnabled && sounds[soundName]) {
+            sounds[soundName].currentTime = 0;
+            sounds[soundName].play().catch(error => console.log('音效播放失败:', error));
+        }
+    }
 
     const gameBoard = document.getElementById('game-board');
     const clicksLeftElement = document.getElementById('clicks-left');
@@ -44,6 +59,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeSwitch = document.querySelector('.theme-switch');
     document.querySelector('.game-info').removeChild(themeSwitch);
     topContainer.appendChild(themeSwitch);
+
+    // 创建音效开关
+    const soundSwitch = document.createElement('div');
+    soundSwitch.classList.add('sound-switch');
+    soundSwitch.innerHTML = `
+        <label class="switch">
+            <input type="checkbox" id="sound-toggle" checked>
+            <span class="slider round"></span>
+        </label>
+        <span>音效</span>
+    `;
+    topContainer.appendChild(soundSwitch);
+
+    // 音效开关事件
+    const soundToggle = document.getElementById('sound-toggle');
+    soundToggle.addEventListener('change', () => {
+        gameState.soundEnabled = soundToggle.checked;
+        localStorage.setItem('tapmeSound', soundToggle.checked);
+    });
+
+    // 从本地存储加载音效设置
+    const savedSound = localStorage.getItem('tapmeSound');
+    if (savedSound !== null) {
+        gameState.soundEnabled = savedSound === 'true';
+        soundToggle.checked = gameState.soundEnabled;
+    }
 
     // 初始化主题
     initTheme();
@@ -258,6 +299,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // 这确保了在消除、移动和下落动画期间用户不能点击格子
         if (gameState.isAnimating || gameState.clicksLeft <= 0) return;
         
+        // 播放点击音效
+        playSound('click');
+        
         const row = parseInt(event.target.dataset.row);
         const col = parseInt(event.target.dataset.col);
         
@@ -348,6 +392,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 50);
             return;
         }
+        
+        // 播放消除音效
+        playSound('merge');
         
         const group = groups[index];
         

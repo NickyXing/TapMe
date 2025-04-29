@@ -1,17 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 游戏状态
     const gameState = {
-        board: [], // 5x5 棋盘
-        clicksLeft: 5, // 剩余点击次数
-        maxClicks: 5, // 最大点击次数
-        boardSize: 5, // 棋盘大小
-        isAnimating: false, // 动画进行中标记
-        cellElements: [], // 存储DOM元素引用
-        score: 0, // 积分
-        maxNumberInGame: 1, // 本局游戏中的最大数字
+        board: [], // 5x5 board
+        clicksLeft: 5, // remaining moves
+        maxClicks: 5, // maximum moves
+        boardSize: 5, // board size
+        isAnimating: false, // animation in progress
+        cellElements: [], // store DOM element references
+        score: 0, // score
+        maxNumberInGame: 1, // highest number in current game
         isNewNumberRecord: false,
-        isNewScoreRecord: false
+        isNewScoreRecord: false,
+        soundEnabled: true // sound effect switch status
     };
+
+    // Sound management
+    const sounds = {
+        click: new Audio('sounds/pop.mp3'),
+        merge: new Audio('sounds/level-up.mp3')
+    };
+
+    // Sound control function
+    function playSound(soundName) {
+        if (gameState.soundEnabled && sounds[soundName]) {
+            sounds[soundName].currentTime = 0;
+            sounds[soundName].play().catch(error => console.log('Sound effect playback failed:', error));
+        }
+    }
 
     const gameBoard = document.getElementById('game-board');
     const clicksLeftElement = document.getElementById('clicks-left');
@@ -40,10 +55,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // 将记录元素移动到顶部容器
     topContainer.appendChild(recordsElement);
     
-    // 将主题切换从当前位置移除并添加到顶部容器
+    // Move theme switch from current position to top container
     const themeSwitch = document.querySelector('.theme-switch');
     document.querySelector('.game-info').removeChild(themeSwitch);
     topContainer.appendChild(themeSwitch);
+
+    // Create sound switch
+    const soundSwitch = document.createElement('div');
+    soundSwitch.classList.add('sound-switch');
+    soundSwitch.innerHTML = `
+        <label class="switch">
+            <input type="checkbox" id="sound-toggle" checked>
+            <span class="slider round"></span>
+        </label>
+        <span>Sound</span>
+    `;
+    topContainer.appendChild(soundSwitch);
+
+    // Sound switch event
+    const soundToggle = document.getElementById('sound-toggle');
+    soundToggle.addEventListener('change', () => {
+        gameState.soundEnabled = soundToggle.checked;
+        localStorage.setItem('tapmeSound', soundToggle.checked);
+    });
+
+    // Load sound settings from local storage
+    const savedSound = localStorage.getItem('tapmeSound');
+    if (savedSound !== null) {
+        gameState.soundEnabled = savedSound === 'true';
+        soundToggle.checked = gameState.soundEnabled;
+    }
 
     // 初始化主题
     initTheme();
@@ -253,10 +294,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 处理格子点击事件
     function handleCellClick(event) {
-        // 当动画正在进行时，阻止用户点击
-        // gameState.isAnimating 在动画开始时设置为 true，动画结束时设置为 false
-        // 这确保了在消除、移动和下落动画期间用户不能点击格子
+        // Prevent user clicks during animation
+        // gameState.isAnimating is set to true at the start of animation and false at the end
+        // This ensures users cannot click cells during elimination, movement and falling animations
         if (gameState.isAnimating || gameState.clicksLeft <= 0) return;
+        
+        // Play click sound effect
+        playSound('click');
         
         const row = parseInt(event.target.dataset.row);
         const col = parseInt(event.target.dataset.col);
@@ -342,12 +386,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 递归处理连通组，一次处理一个
     function processNextGroup(groups, index, clickedRow, clickedCol) {
         if (index >= groups.length) {
-            // 所有连通组都处理完毕，进行下落
+            // All connected groups processed, apply gravity
             setTimeout(() => {
                 applyGravity();
             }, 50);
             return;
         }
+        
+        // Play merge sound effect
+        playSound('merge');
         
         const group = groups[index];
         
